@@ -34,6 +34,8 @@ pipeline {
                     terraform init
                     terraform apply -auto-approve
 
+                    echo "Waiting for EC2 instance to be ready..."
+                    sleep 120
                     '''
 
                 }
