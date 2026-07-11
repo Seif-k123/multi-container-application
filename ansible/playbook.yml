@@ -4,6 +4,7 @@
   become: true
 
   tasks:
+
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
@@ -19,25 +20,25 @@
       ansible.builtin.file:
         path: /etc/apt/keyrings
         state: directory
-        mode: '0755'
+        mode: "0755"
 
     - name: Download Docker GPG key
       ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
         dest: /etc/apt/keyrings/docker.asc
-        mode: '0644'
+        mode: "0644"
 
     - name: Add Docker repository
       ansible.builtin.apt_repository:
         repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-        state: present
         filename: docker
+        state: present
 
-    - name: Update apt cache after adding Docker repository
+    - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
 
-    - name: Install Docker Engine and Docker Compose
+    - name: Install Docker
       ansible.builtin.apt:
         name:
           - docker-ce
@@ -47,7 +48,7 @@
           - docker-compose-plugin
         state: present
 
-    - name: Ensure Docker service is running
+    - name: Start Docker
       ansible.builtin.service:
         name: docker
         state: started
@@ -59,20 +60,38 @@
         groups: docker
         append: true
 
-    - name: Verify Docker installation
-      ansible.builtin.command: docker --version
-      register: docker_version
+    - name: Create application directory
+      ansible.builtin.file:
+        path: /home/ubuntu/app
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: "0755"
+
+    - name: Copy docker-compose.yml
+      ansible.builtin.copy:
+        src: ../docker-compose.yml
+        dest: /home/ubuntu/app/docker-compose.yml
+        owner: ubuntu
+        group: ubuntu
+        mode: "0644"
+
+    - name: Pull latest images
+      ansible.builtin.command:
+        cmd: docker compose pull
+        chdir: /home/ubuntu/app
+
+    - name: Start containers
+      ansible.builtin.command:
+        cmd: docker compose up -d
+        chdir: /home/ubuntu/app
+
+    - name: Show running containers
+      ansible.builtin.command:
+        cmd: docker ps
+      register: docker_ps
       changed_when: false
 
-    - name: Show Docker version
+    - name: Print running containers
       ansible.builtin.debug:
-        var: docker_version.stdout
-
-    - name: Verify Docker Compose installation
-      ansible.builtin.command: docker compose version
-      register: docker_compose_version
-      changed_when: false
-
-    - name: Show Docker Compose version
-      ansible.builtin.debug:
-        var: docker_compose_version.stdout
+        var: docker_ps.stdout_lines
