@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "seifkhaled123/multi-container-app"
-        DOCKER_CREDS = "dockerhub-creds"
+        DOCKER_CREDS = "dockerhub-cred"
     }
 
     stages {
