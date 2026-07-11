@@ -22,4 +22,4 @@ route_table_name = "todo-public-rt"
 
 security_group_name = "todo-sg"
 
-ssh_cidr_block = "156.198.217.135/32"
+ssh_cidr_block = "156.198.204.169/32"
