@@ -35,7 +35,7 @@ pipeline {
                     terraform apply -auto-approve
 
                     echo "Waiting for EC2 instance to be ready..."
-                    sleep 120
+                    sleep 60
                     '''
 
                 }
@@ -114,7 +114,8 @@ pipeline {
             steps {
 
                 sh '''
-
+                export ANSIBLE_HOST_KEY_CHECKING=False
+    
                 ansible-playbook \
                 -i ${ANSIBLE_INVENTORY} \
                 ansible/playbook.yml
